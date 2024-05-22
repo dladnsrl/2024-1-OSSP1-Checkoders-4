@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>컴파일 값확인</title>
+    <style>
+        textarea {
+            width: 100%;
+            height: 150px;
+        }
+        input[type="text"] {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<form action="/submit" method="post">
+    <label for="sourceCode">소스코드:</label><br>
+    <textarea id="sourceCode" name="sourceCode"></textarea><br>
+
+    <label for="args">입력값</label><br>
+    <input type="text" id="args" name="args"><br>
+
+    <label for="xOutput">예상 출력값:</label><br>
+    <input type="text" id="xOutput" name="xOutput"><br>
+
+    <input type="submit" value="전송">
+</form>
+</body>
+</html>
