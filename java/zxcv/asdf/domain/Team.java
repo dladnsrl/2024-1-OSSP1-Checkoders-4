@@ -17,7 +17,7 @@ public class Team {
     private Long team_id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_token", nullable = false)
     private User user;
 
     @ManyToOne
