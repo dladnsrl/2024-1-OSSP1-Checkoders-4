@@ -15,6 +15,10 @@ public class LectureAssignmentMapping {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "user_token", nullable = false)
+    private User user;
+
+    @ManyToOne
     @JoinColumn(name = "lecture_id", nullable = false)
     private Lecture lecture;
 

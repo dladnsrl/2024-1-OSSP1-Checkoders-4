@@ -3,14 +3,10 @@ package zxcv.asdf.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import zxcv.asdf.domain.Enrollment;
-import zxcv.asdf.domain.Lecture;
-import zxcv.asdf.domain.LectureAssignment;
-import zxcv.asdf.domain.User;
-import zxcv.asdf.repository.EnrollmentRepository;
-import zxcv.asdf.repository.LectureAssignmentRepository;
-import zxcv.asdf.repository.LectureRepository;
-import zxcv.asdf.repository.UserRepository;
+import zxcv.asdf.DTO.AssignmentDTO;
+import zxcv.asdf.DTO.AssignmentListDTO;
+import zxcv.asdf.domain.*;
+import zxcv.asdf.repository.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +16,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
 
+    private final LectureAssignmentMappingRepository lectureAssignmentMappingRepository;
     private final LectureAssignmentRepository lectureAssignmentRepository;
     private final LectureRepository lectureRepository;
     private final UserRepository userRepository;
@@ -65,5 +62,52 @@ public class UserService {
         return enrollments.stream()
                 .map(Enrollment::getLecture)
                 .collect(Collectors.toList());
+    }
+    public LectureAssignment addLectureAssignment(String token,LectureAssignment lectureAssignment) {
+        lectureAssignmentRepository.save(lectureAssignment);
+        LectureAssignmentMapping lectureAssignmentMapping= LectureAssignmentMapping.builder()
+                .user(userRepository.findById(token).orElseThrow(() -> new RuntimeException("User not found")))
+                .lecture(lectureAssignment.getLecture())
+                .lectureAssignment(lectureAssignment)
+                .build();
+        lectureAssignmentMappingRepository.save(lectureAssignmentMapping);
+        return lectureAssignment;
+    }
+    public AssignmentListDTO getLectureAssignments(String token, Long lectureId) {
+        List<LectureAssignmentMapping> allMappings = lectureAssignmentMappingRepository.findByLectureId(lectureId);
+
+        List<Long> userAssignmentIds = allMappings.stream()
+                .filter(mapping -> mapping.getUser().getToken().equals(token))
+                .map(LectureAssignmentMapping::getId)
+                .collect(Collectors.toList());
+
+        List<Long> otherAssignmentIds = allMappings.stream()
+                .filter(mapping -> !mapping.getUser().getToken().equals(token))
+                .map(LectureAssignmentMapping::getId)
+                .collect(Collectors.toList());
+
+        List<LectureAssignment> userAssignments = lectureAssignmentRepository.findAllById(userAssignmentIds);
+        List<LectureAssignment> otherAssignments = lectureAssignmentRepository.findAllById(otherAssignmentIds);
+
+        List<AssignmentDTO> userAssignmentDTOs = userAssignments.stream()
+                .map(this::convertToAssignmentDTO)
+                .collect(Collectors.toList());
+
+        List<AssignmentDTO> otherAssignmentDTOs = otherAssignments.stream()
+                .map(this::convertToAssignmentDTO)
+                .collect(Collectors.toList());
+
+        return AssignmentListDTO.builder()
+                .task(userAssignmentDTOs)
+                .exercise(otherAssignmentDTOs)
+                .build();
+    }
+    private AssignmentDTO convertToAssignmentDTO(LectureAssignment assignment) {
+        return AssignmentDTO.builder()
+                .title(assignment.getTitle())
+                .description(assignment.getDescription())
+                .deadline(assignment.getDeadline())
+                .isDone(assignment.isDone()) // assuming `isDone` is a method in `LectureAssignment`
+                .build();
     }
 }

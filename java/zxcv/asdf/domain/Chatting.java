@@ -6,28 +6,28 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Answer {
+public class Chatting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String correct;
-
-    private String answerText;
+    @ManyToOne
+    @JoinColumn(name = "sender_token", nullable = false)
+    private User sender;
 
     @ManyToOne
-    @JoinColumn(name = "user_token", nullable = false)
-    private User user;
+    @JoinColumn(name = "receiver_token", nullable = false)
+    private User receiver;
 
-    @ManyToOne
-    @JoinColumn(name = "assignment_id", nullable = false)
-    private LectureAssignment assignment;
+    private String content;
 
-
+    private LocalDateTime timestamp;
 }

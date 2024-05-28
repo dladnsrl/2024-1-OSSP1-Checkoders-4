@@ -18,7 +18,10 @@ public class Lecture {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+
+    private String course;
 
     @OneToMany(mappedBy = "lecture")
     private List<Enrollment> enrollments;
