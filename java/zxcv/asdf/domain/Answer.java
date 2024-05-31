@@ -29,5 +29,4 @@ public class Answer {
     @JoinColumn(name = "assignment_id", nullable = false)
     private LectureAssignment assignment;
 
-
 }

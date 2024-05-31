@@ -25,4 +25,8 @@ public class LectureAssignmentMapping {
     @ManyToOne
     @JoinColumn(name = "lecture_assignment_id", nullable = false)
     private LectureAssignment lectureAssignment;
+
+    public Long getLectureAssignmentId() {
+        return lectureAssignment.getId();
+    }
 }
