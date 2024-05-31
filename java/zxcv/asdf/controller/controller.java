@@ -11,8 +11,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import zxcv.asdf.DTO.AssignmentListDTO;
-import zxcv.asdf.DTO.AssignmentRequestDTO;
+
+import zxcv.asdf.DTO.page2_lecture;
+import zxcv.asdf.DTO.page4_makeProb;
 import zxcv.asdf.domain.Enrollment;
 import zxcv.asdf.domain.Lecture;
 import zxcv.asdf.domain.LectureAssignment;
@@ -85,22 +86,15 @@ public class controller {
                     .name(name)
                     .build();
             userService.addUser(user);
-            response.sendRedirect("http://localhost:3000/main?userId=" + token);
+            response.sendRedirect("http://localhost:3000/main?usertoken=" + token+"&access_token="+accessToken);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-    @PostMapping("/createuser")
-    public User createUser(@RequestParam String token,@RequestParam String name) {
-        // 임의로 사용자 정보를 설정하여 User 객체를 생성합니다.
-        User user = User.builder()
-                .token(token)
-                .name(name)
-                .build();
-        return userService.addUser(user);
+    @GetMapping("/{token}/getuser")
+    public User getUser(@PathVariable String token) {
+        return userService.getUser(token);
     }
-
     @PostMapping("/{token}/createlecture")
     public List<Lecture> createLecture(@PathVariable String token, @RequestParam String lectureName,@RequestParam String course) {
         User user = userService.getUser(token);
@@ -115,7 +109,12 @@ public class controller {
                 .build();
         userService.addEnrollment(enrollment);
 
-        return userService.getLecturesByUserToken(user.getToken());
+        return userService.getLecturesByUserToken(token);
+    }
+
+    @PostMapping("/{token}/getlectures")
+    public List<Lecture> getLectures(@PathVariable String token) {
+        return userService.getLecturesByUserToken(token);
     }
 
     @PostMapping("/{token}/participate")
@@ -129,35 +128,37 @@ public class controller {
         userService.addEnrollment(enrollment);
         return userService.getLecturesByUserToken(user.getToken());
     }
+    @GetMapping("/{token}/{lectureId}/lecturepage")
+    public page2_lecture lecturepage(@PathVariable String token, @PathVariable Long lectureId) {
+        return userService.getPage2Lecture(token, lectureId);
+    }
+
     @PostMapping("/{token}/{lectureId}/createAssignment")
-    public LectureAssignment createAssignment(@PathVariable String token,
+    public page2_lecture createAssignment(@PathVariable String token,
                                               @PathVariable Long lectureId,
-                                              @RequestBody AssignmentRequestDTO assignmentRequestDTO) {
+                                              @RequestBody page4_makeProb page4_makeProb) {
 
         Lecture lecture=userService.getLectureById(lectureId);
 
-        LectureAssignment lectureAssignment = LectureAssignment.builder()
+        LectureAssignment lectureAssignment=LectureAssignment.builder()
+                .title(page4_makeProb.getTitle())
+                .description(page4_makeProb.getDescription())
                 .lecture(lecture)
-                .title(assignmentRequestDTO.getTitle())
-                .description(assignmentRequestDTO.getDescription())
-                .deadline(assignmentRequestDTO.getDeadline())
-                .hwTest1(assignmentRequestDTO.getHwTest1())
-                .hwTestAnswer1(assignmentRequestDTO.getHwTestAnswer1())
-                .hwTest2(assignmentRequestDTO.getHwTest2())
-                .hwTestAnswer2(assignmentRequestDTO.getHwTestAnswer2())
-                .hwTest3(assignmentRequestDTO.getHwTest3())
-                .hwTestAnswer3(assignmentRequestDTO.getHwTestAnswer3())
-                .hwTest4(assignmentRequestDTO.getHwTest4())
-                .hwTestAnswer4(assignmentRequestDTO.getHwTestAnswer4())
-                .hwTest5(assignmentRequestDTO.getHwTest5())
-                .hwTestAnswer5(assignmentRequestDTO.getHwTestAnswer5())
+                .deadline(page4_makeProb.getDeadline())
+                .hwTest1(page4_makeProb.getHwTest1())
+                .hwTestAnswer1(page4_makeProb.getHwTestAnswer1())
+                .hwTest2(page4_makeProb.getHwTest2())
+                .hwTestAnswer2(page4_makeProb.getHwTestAnswer2())
+                .hwTest3(page4_makeProb.getHwTest3())
+                .hwTestAnswer3(page4_makeProb.getHwTestAnswer3())
+                .hwTest4(page4_makeProb.getHwTest4())
+                .hwTestAnswer4(page4_makeProb.getHwTestAnswer4())
+                .hwTest5(page4_makeProb.getHwTest5())
+                .hwTestAnswer5(page4_makeProb.getHwTestAnswer5())
                 .build();
 
-        return userService.addLectureAssignment(token,lectureAssignment);
-    }
-    @GetMapping("/{token}/{lectureId}/getlectureassignment")
-    public AssignmentListDTO getLectureAssignment(@PathVariable String token, @PathVariable Long lectureId) {
-        return userService.getLectureAssignments(token, lectureId);
+        userService.addLectureAssignment(token,lectureAssignment);
+        return userService.getPage2Lecture(token, lectureId);
     }
 
     @PostMapping("/submit")

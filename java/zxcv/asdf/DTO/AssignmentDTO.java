@@ -17,4 +17,3 @@ public class AssignmentDTO {
     private LocalDateTime deadline;
     private boolean isDone;
 }
-
