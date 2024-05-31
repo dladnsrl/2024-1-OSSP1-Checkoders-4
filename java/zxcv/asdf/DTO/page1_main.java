@@ -15,7 +15,5 @@ public class page1_main {
     private String token;
     private String name;
 
-    private List<Lecture> lectures;
-
-
+    private List<LectureDTO> lectures;
 }

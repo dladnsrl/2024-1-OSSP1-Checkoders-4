@@ -12,6 +12,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import zxcv.asdf.DTO.LectureDTO;
+import zxcv.asdf.DTO.page1_main;
 import zxcv.asdf.DTO.page2_lecture;
 import zxcv.asdf.DTO.page4_makeProb;
 import zxcv.asdf.domain.Enrollment;
@@ -27,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -91,9 +94,31 @@ public class controller {
             e.printStackTrace();
         }
     }
-    @GetMapping("/{token}/getuser")
-    public User getUser(@PathVariable String token) {
-        return userService.getUser(token);
+    @PostMapping("/{token}/{name}/dummy_user")
+    public void dummy_user(@PathVariable String token,@PathVariable String name){
+        User user= User.builder()
+                .token(token)
+                .name(name)
+                .build();
+        userService.addUser(user);
+
+    }
+    @GetMapping("/{token}/mainpage")
+    public page1_main mainpage(@PathVariable String token) {
+        List<Lecture> lectures = userService.getLecturesByUserToken(token);
+
+        List<LectureDTO> lectureDTOs = lectures.stream()
+                .map(lecture -> LectureDTO.builder()
+                        .name(lecture.getName())
+                        .madeby(lecture.getMadeby())
+                        .build())
+                .collect(Collectors.toList());
+
+        return page1_main.builder()
+                .token(token)
+                .name(userService.getUser(token).getName())
+                .lectures(lectureDTOs)
+                .build();
     }
     @PostMapping("/{token}/createlecture")
     public List<Lecture> createLecture(@PathVariable String token, @RequestParam String lectureName,@RequestParam String course) {
@@ -101,6 +126,7 @@ public class controller {
         Lecture lecture = Lecture.builder()
                 .name(lectureName)
                 .course(course)
+                .madeby(token)
                 .build();
         userService.addLecture(lecture);
         Enrollment enrollment = Enrollment.builder()
@@ -118,7 +144,7 @@ public class controller {
     }
 
     @PostMapping("/{token}/participate")
-    public List<Lecture> participate(@PathVariable String token, @RequestParam String lectureName) {
+    public page1_main participate(@PathVariable String token, @RequestParam String lectureName) {
         User user = userService.getUser(token);
         Lecture lecture = userService.getLectureByName(lectureName);
         Enrollment enrollment = Enrollment.builder()
@@ -126,8 +152,23 @@ public class controller {
                 .lecture(lecture)
                 .build();
         userService.addEnrollment(enrollment);
-        return userService.getLecturesByUserToken(user.getToken());
+
+        // 참여 후 메인 페이지로 돌아가기 위해서 다시 강의 목록 가져오기
+        List<Lecture> lectures = userService.getLecturesByUserToken(token);
+        List<LectureDTO> lectureDTOs = lectures.stream()
+                .map(lec -> LectureDTO.builder()
+                        .name(lec.getName())
+                        .madeby(lec.getMadeby())
+                        .build())
+                .collect(Collectors.toList());
+
+        return page1_main.builder()
+                .token(token)
+                .name(userService.getUser(token).getName())
+                .lectures(lectureDTOs)
+                .build();
     }
+
     @GetMapping("/{token}/{lectureId}/lecturepage")
     public page2_lecture lecturepage(@PathVariable String token, @PathVariable Long lectureId) {
         return userService.getPage2Lecture(token, lectureId);

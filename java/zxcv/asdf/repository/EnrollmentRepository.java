@@ -13,4 +13,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByLectureId(Long lectureId);
     @Query("SELECT e FROM Enrollment e WHERE e.user.token = :token")
     List<Enrollment> findByUserToken(@Param("token") String token);;
+
+
 }
