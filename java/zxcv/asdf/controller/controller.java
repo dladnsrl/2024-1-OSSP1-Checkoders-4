@@ -12,10 +12,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import zxcv.asdf.DTO.LectureDTO;
-import zxcv.asdf.DTO.page1_main;
-import zxcv.asdf.DTO.page2_lecture;
-import zxcv.asdf.DTO.page4_makeProb;
+import zxcv.asdf.DTO.*;
 import zxcv.asdf.domain.Enrollment;
 import zxcv.asdf.domain.Lecture;
 import zxcv.asdf.domain.LectureAssignment;
@@ -138,7 +135,7 @@ public class controller {
         return userService.getLecturesByUserToken(token);
     }
 
-    @PostMapping("/{token}/getlectures")
+    @GetMapping("/{token}/getlectures")
     public List<Lecture> getLectures(@PathVariable String token) {
         return userService.getLecturesByUserToken(token);
     }
@@ -202,6 +199,39 @@ public class controller {
         return userService.getPage2Lecture(token, lectureId);
     }
 
+    @GetMapping("/{token}/{lectureId}/{lectureAssignmentId}/assignmentpage")
+    public page3_solve_1 assignmentpage(@PathVariable String token,
+                                        @PathVariable Long lectureId,
+                                        @PathVariable Long lectureAssignmentId) {
+        // LectureAssignment 정보를 가져옵니다.
+        LectureAssignment lectureAssignment = userService.getLectureAssignmentById(lectureAssignmentId);
+
+        // page3_solve_1 객체에 필요한 정보를 설정합니다.
+        page3_solve_1 solvePage = page3_solve_1.builder()
+                .lectureId(lectureAssignment.getLecture().getId())
+                .title(lectureAssignment.getTitle())
+                .description(lectureAssignment.getDescription())
+                .hwTest1(lectureAssignment.getHwTest1())
+                .hwTestAnswer1(lectureAssignment.getHwTestAnswer1())
+                .build();
+
+        return solvePage;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     @PostMapping("/submit")
     public String submit(@RequestBody String sourceCode,@RequestParam String args,@RequestParam String xOutput) throws Exception {
         Path tempDir = Files.createTempDirectory("compile_output");
@@ -230,7 +260,6 @@ public class controller {
         }
         return codeFeedbackService.getCodeFeedback(code).replace("\n", "<br>");
     }
-
     private String extractJavaCode(String fullCode) {
         int argsIndex = fullCode.indexOf("&args=");
         if (argsIndex != -1) {

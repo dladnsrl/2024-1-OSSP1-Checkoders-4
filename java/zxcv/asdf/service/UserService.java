@@ -128,6 +128,10 @@ public class UserService {
         lectureAssignmentMappingRepository.save(lectureAssignmentMapping);
         return lectureAssignment;
     }
+    public LectureAssignment getLectureAssignmentById(Long lectureAssignmentId) {
+        return lectureAssignmentRepository.findById(lectureAssignmentId)
+                .orElseThrow(() -> new RuntimeException("Lecture Assignment not found"));
+    }
 
 }
 

@@ -23,4 +23,6 @@ public class Team {
     @ManyToOne
     @JoinColumn(name = "lecture_id", nullable = false)
     private Lecture lecture;
+
+    private String list_name;
 }
