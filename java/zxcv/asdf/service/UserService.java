@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import zxcv.asdf.DTO.AssignmentDTO;
+import zxcv.asdf.DTO.LectureDTO;
+import zxcv.asdf.DTO.UserDTO;
 import zxcv.asdf.DTO.page2_lecture;
 import zxcv.asdf.domain.*;
 import zxcv.asdf.repository.*;
@@ -64,6 +66,15 @@ public class UserService {
 
         List<String> teamMemberTokens = teamRepository.findUserTokensByLectureIdAndTeamId(lectureId, teamId);
         List<User> teamMembers = userRepository.findAllByTokenIn(teamMemberTokens);
+
+        // Convert teamMembers to UserDTO
+        List<UserDTO> teamMemberDTOs = teamMembers.stream()
+                .map(user -> UserDTO.builder()
+                        .token(user.getToken())
+                        .name(user.getName())
+                        .build())
+                .collect(Collectors.toList());
+
         // Get lecture assignments
         List<LectureAssignmentMapping> allMappings = lectureAssignmentMappingRepository.findByLectureId(lectureId);
 
@@ -91,9 +102,10 @@ public class UserService {
         return page2_lecture.builder()
                 .task(userAssignmentDTOs)
                 .exercise(otherAssignmentDTOs)
-                .teamMembers(teamMembers)
+                .teamMembers(teamMemberDTOs)  // Changed to use teamMemberDTOs
                 .build();
     }
+
 
     public Enrollment addEnrollment(Enrollment enrollment) {
         return enrollmentRepository.save(enrollment);
@@ -104,10 +116,7 @@ public class UserService {
     }
 
     public List<Lecture> getLecturesByUserToken(String token) {
-        List<Enrollment> enrollments = enrollmentRepository.findByUserToken(token);
-        return enrollments.stream()
-                .map(Enrollment::getLecture)
-                .collect(Collectors.toList());
+        return lectureRepository.findLecturesByUserToken(token);
     }
     public LectureAssignment addLectureAssignment(String token,LectureAssignment lectureAssignment) {
         lectureAssignmentRepository.save(lectureAssignment);

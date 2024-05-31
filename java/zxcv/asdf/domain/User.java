@@ -1,11 +1,12 @@
 package zxcv.asdf.domain;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
 
 
 @Entity
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -18,6 +19,7 @@ public class User {
     private String name;
 
     @OneToMany(mappedBy = "user")
+    @JsonManagedReference
     private List<Enrollment> enrollments;
 
     @OneToMany(mappedBy = "user")

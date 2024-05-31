@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 
 @Data
 public class page4_makeProb {
-    private Long lectureId;
     private String title;
 
     private String description;
